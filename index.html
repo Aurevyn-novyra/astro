@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Astro + Tarot (Traditional • Ethical)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<style>
+/* ===== COSMIC GLASS UI ===== */
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: radial-gradient(circle at top, #1b2735, #090a0f);
+  color: #eaeaea;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 24px;
+}
+
+.glass {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(18px);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.4);
+  margin-bottom: 24px;
+}
+
+h1, h2 {
+  font-weight: 600;
+}
+
+input, button {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 10px;
+  color: white;
+}
+
+button {
+  cursor: pointer;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap: 12px;
+}
+
+canvas {
+  background: rgba(0,0,0,0.3);
+  border-radius: 50%;
+  display: block;
+  margin: auto;
+}
+
+.tarot-card {
+  width: 120px;
+  height: 200px;
+  border-radius: 12px;
+  background: linear-gradient(135deg,#3a1c71,#d76d77,#ffaf7b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px;
+}
+
+footer {
+  opacity: 0.7;
+  font-size: 13px;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>🌌 Astrology + Tarot (Traditional & Ethical)</h1>
+
+<!-- ===== INPUT ===== -->
+<div class="glass">
+  <h2>Birth Details</h2>
+  <div class="row">
+    <input id="dob" type="date">
+    <input id="tob" type="time">
+    <input id="lat" placeholder="Latitude (e.g. 28.61)">
+    <input id="lon" placeholder="Longitude (e.g. 77.20)">
+    <input id="tz" placeholder="Timezone (+5.5)">
+  </div>
+  <br>
+  <button onclick="generateChart()">Generate Chart</button>
+</div>
+
+<!-- ===== KUNDLI ===== -->
+<div class="glass">
+  <h2>Kundli (Whole Sign)</h2>
+  <canvas id="chart" width="320" height="320"></canvas>
+  <div id="astroOutput"></div>
+</div>
+
+<!-- ===== TAROT ===== -->
+<div class="glass">
+  <h2>Tarot Guidance</h2>
+  <button onclick="drawTarot()">Draw Card</button>
+  <br><br>
+  <div id="tarotResult"></div>
+</div>
+
+<footer>
+<p>
+<strong>Disclaimer:</strong><br>
+This platform provides traditional astrology and tarot interpretations for reflection and cultural interest only.
+It does not provide medical, legal, or life-altering advice.<br>
+Tarot readings are symbolic and meant for introspection, not prediction.
+</p>
+</footer>
+
+</div>
+
+<script>
+/* ===========================
+   TIME & ASTRONOMY CORE
+=========================== */
+
+function toJulian(dateUTC) {
+  return dateUTC / 86400000 + 2440587.5;
+}
+
+// Approx Lahiri Ayanamsa
+function ayanamsa(jd) {
+  const T = (jd - 2451545.0) / 36525;
+  return 22.460 + 1.396042 * T;
+}
+
+// Sun longitude (simplified, accurate enough)
+function sunLongitude(jd) {
+  const T = (jd - 2451545) / 36525;
+  let L = 280.46646 + 36000.76983 * T;
+  let M = 357.52911 + 35999.05029 * T;
+  let C = (1.914602 - 0.004817*T)*Math.sin(M*Math.PI/180);
+  return (L + C - ayanamsa(jd) + 360) % 360;
+}
+
+// Moon longitude (low precision)
+function moonLongitude(jd) {
+  let D = jd - 2451545;
+  let L = 218.316 + 13.176396 * D;
+  return (L - ayanamsa(jd) + 360) % 360;
+}
+
+// Ascendant (simplified)
+function ascendant(jd, lat, lon) {
+  let T = (jd - 2451545.0)/36525;
+  let GST = 280.46061837 + 360.98564736629*(jd-2451545);
+  let LST = (GST + lon) % 360;
+  let asc = Math.atan2(
+    Math.sin(LST*Math.PI/180),
+    Math.cos(LST*Math.PI/180)
+  ) * 180/Math.PI;
+  return (asc - ayanamsa(jd) + 360) % 360;
+}
+
+/* ===========================
+   ASTRO HELPERS
+=========================== */
+
+const signs = [
+  "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
+  "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"
+];
+
+const nakshatras = [
+  "Ashwini","Bharani","Krittika","Rohini","Mrigashira","Ardra",
+  "Punarvasu","Pushya","Ashlesha","Magha","Purva Phalguni","Uttara Phalguni",
+  "Hasta","Chitra","Swati","Vishakha","Anuradha","Jyeshtha",
+  "Mula","Purva Ashadha","Uttara Ashadha","Shravana","Dhanishta",
+  "Shatabhisha","Purva Bhadrapada","Uttara Bhadrapada","Revati"
+];
+
+function signFromLon(lon){ return signs[Math.floor(lon/30)]; }
+
+function nakshatraFromLon(lon){
+  let n = Math.floor(lon / 13.3333);
+  let pada = Math.floor((lon % 13.3333) / 3.3333) + 1;
+  return nakshatras[n] + " (Pada " + pada + ")";
+}
+
+/* ===========================
+   KUNDLI DRAW
+=========================== */
+
+function drawChart(ascSign){
+  const c = document.getElementById("chart");
+  const ctx = c.getContext("2d");
+  ctx.clearRect(0,0,320,320);
+
+  ctx.strokeStyle = "#aaa";
+  ctx.beginPath();
+  ctx.arc(160,160,140,0,Math.PI*2);
+  ctx.stroke();
+
+  for(let i=0;i<12;i++){
+    let angle = (i*30-90)*Math.PI/180;
+    ctx.fillText(signs[i],160+110*Math.cos(angle),160+110*Math.sin(angle));
+  }
+
+  ctx.fillText("Asc: "+ascSign,120,160);
+}
+
+/* ===========================
+   MAIN GENERATION
+=========================== */
+
+function generateChart(){
+  const dob = document.getElementById("dob").value;
+  const tob = document.getElementById("tob").value;
+  const lat = parseFloat(document.getElementById("lat").value);
+  const lon = parseFloat(document.getElementById("lon").value);
+  const tz = parseFloat(document.getElementById("tz").value);
+
+  const local = new Date(dob+"T"+tob);
+  const utc = local.getTime() - tz*3600000;
+  const jd = toJulian(utc);
+
+  const sun = sunLongitude(jd);
+  const moon = moonLongitude(jd);
+  const asc = ascendant(jd,lat,lon);
+
+  const output = `
+  <p><strong>Ascendant:</strong> ${signFromLon(asc)}</p>
+  <p><strong>Sun:</strong> ${signFromLon(sun)}</p>
+  <p><strong>Moon:</strong> ${signFromLon(moon)}</p>
+  <p><strong>Nakshatra:</strong> ${nakshatraFromLon(moon)}</p>
+  `;
+
+  document.getElementById("astroOutput").innerHTML = output;
+  drawChart(signFromLon(asc));
+}
+
+/* ===========================
+   TAROT SYSTEM
+=========================== */
+
+const tarotDeck = [
+  {
+    name:"The Fool",
+    upright:"New beginnings, openness, curiosity.",
+    reversed:"Hesitation, fear of change."
+  },
+  {
+    name:"The Magician",
+    upright:"Skill, focus, conscious creation.",
+    reversed:"Scattered energy, self-doubt."
+  },
+  {
+    name:"The High Priestess",
+    upright:"Inner awareness, intuition.",
+    reversed:"Ignoring inner voice."
+  }
+  // Extend to full 78 cards easily
+];
+
+function drawTarot(){
+  const card = tarotDeck[Math.floor(Math.random()*tarotDeck.length)];
+  const reversed = Math.random() < 0.5;
+
+  document.getElementById("tarotResult").innerHTML = `
+    <div class="tarot-card">
+      <div>
+        <strong>${card.name}</strong><br><br>
+        ${reversed ? card.reversed : card.upright}<br><br>
+        <em>${reversed ? "Reversed" : "Upright"}</em>
+      </div>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
