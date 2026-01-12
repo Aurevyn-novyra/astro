@@ -1,286 +1,151 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>Astro + Tarot (Traditional • Ethical)</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!DOCTYPE html> <html lang="en"> <head> <!-- CleanShot – Single-File Micro-SaaS Author: Placeholder Deployable directly on GitHub Pages --> <meta charset="UTF-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <title>CleanShot – Turn raw text into authority</title> <!-- Google Fonts --> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"> <!-- Tailwind CSS CDN --> <script src="https://cdn.tailwindcss.com"></script> <!-- html2canvas (lazy loaded later) --> <style> /* ========================================================= BASE DESIGN TOKENS ========================================================= */ html { scroll-behavior: smooth; } body { font-family: 'Inter', system-ui, sans-serif; background: radial-gradient(1200px 600px at 10% -10%, #1f2937, transparent), radial-gradient(800px 400px at 90% 10%, #111827, transparent), #030712; color: #e5e7eb; } .font-brutal { font-weight: 800; letter-spacing: -0.02em; } .glass { background: rgba(255, 255, 255, 0.06); backdrop-filter: blur(var(--blur, 16px)); -webkit-backdrop-filter: blur(var(--blur, 16px)); border: 1px solid rgba(255, 255, 255, 0.12); } .noise::after { content: ""; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"); pointer-events: none; mix-blend-mode: overlay; } .range { accent-color: #6366f1; } .pro-locked { opacity: 0.4; filter: grayscale(1); cursor: not-allowed; } .window-dots span { width: 10px; height: 10px; border-radius: 9999px; display: inline-block; } .tooltip { position: relative; } .tooltip:hover::after { content: attr(data-tip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: #020617; border: 1px solid rgba(255,255,255,0.1); padding: 6px 10px; border-radius: 8px; font-size: 12px; white-space: nowrap; z-index: 50; } </style> </head> <body class="antialiased"> <!-- ========================================================= HERO / LANDING ========================================================= --> <section class="relative overflow-hidden"> <div class="max-w-6xl mx-auto px-6 py-24 text-center"> <h1 class="text-5xl md:text-6xl font-brutal mb-4">CleanShot</h1> <p class="text-xl text-indigo-400 mb-2">Turn raw text into authority.</p> <p class="text-lg text-gray-400 mb-8">Built for people who build in public.</p> <a href="#app" class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 transition text-white font-semibold"> Start Creating → </a> <p class="mt-4 text-sm text-gray-500">No signup. No tracking. One HTML file.</p> </div> </section> <!-- ========================================================= APP UI ========================================================= --> <section id="app" class="max-w-7xl mx-auto px-6 py-20"> <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- ================= LEFT PANEL ================= -->
+<div class="glass rounded-2xl p-6 space-y-5">
 
-<style>
-/* ===== COSMIC GLASS UI ===== */
-body {
-  margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
-  background: radial-gradient(circle at top, #1b2735, #090a0f);
-  color: #eaeaea;
-  min-height: 100vh;
-}
+  <h2 class="text-xl font-semibold">Controls</h2>
 
-.container {
-  max-width: 1100px;
-  margin: auto;
-  padding: 24px;
-}
+  <!-- Text Input -->
+  <textarea id="textInput" rows="6" class="w-full rounded-xl bg-black/30 border border-white/10 p-4 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Write something worth sharing…"></textarea>
 
-.glass {
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(18px);
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 0 40px rgba(0,0,0,0.4);
-  margin-bottom: 24px;
-}
-
-h1, h2 {
-  font-weight: 600;
-}
-
-input, button {
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 8px;
-  padding: 10px;
-  color: white;
-}
-
-button {
-  cursor: pointer;
-}
-
-.row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
-  gap: 12px;
-}
-
-canvas {
-  background: rgba(0,0,0,0.3);
-  border-radius: 50%;
-  display: block;
-  margin: auto;
-}
-
-.tarot-card {
-  width: 120px;
-  height: 200px;
-  border-radius: 12px;
-  background: linear-gradient(135deg,#3a1c71,#d76d77,#ffaf7b);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 10px;
-}
-
-footer {
-  opacity: 0.7;
-  font-size: 13px;
-  text-align: center;
-}
-</style>
-</head>
-
-<body>
-<div class="container">
-
-<h1>🌌 Astrology + Tarot (Traditional & Ethical)</h1>
-
-<!-- ===== INPUT ===== -->
-<div class="glass">
-  <h2>Birth Details</h2>
-  <div class="row">
-    <input id="dob" type="date">
-    <input id="tob" type="time">
-    <input id="lat" placeholder="Latitude (e.g. 28.61)">
-    <input id="lon" placeholder="Longitude (e.g. 77.20)">
-    <input id="tz" placeholder="Timezone (+5.5)">
+  <!-- Presets -->
+  <div class="flex gap-2 text-sm">
+    <button class="preset px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20" data-type="tweet">Tweet</button>
+    <button class="preset px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20" data-type="testimonial">Testimonial</button>
+    <button class="preset px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20" data-type="code">Code Snippet</button>
   </div>
-  <br>
-  <button onclick="generateChart()">Generate Chart</button>
+
+  <!-- Mode Toggle -->
+  <div class="flex items-center gap-4">
+    <label class="flex items-center gap-2">
+      <input type="radio" name="mode" value="text" checked>
+      <span>Text Mode</span>
+    </label>
+    <label class="flex items-center gap-2">
+      <input type="radio" name="mode" value="code">
+      <span>Code Mode</span>
+    </label>
+  </div>
+
+  <!-- Font -->
+  <div>
+    <label class="block text-sm mb-1">Font Family</label>
+    <select id="fontFamily" class="w-full rounded-xl bg-black/30 border border-white/10 p-2">
+      <option value="Inter">Inter</option>
+      <option value="JetBrains Mono">JetBrains Mono</option>
+    </select>
+  </div>
+
+  <!-- Font Size -->
+  <div>
+    <label class="block text-sm mb-1">Font Size</label>
+    <input id="fontSize" type="range" min="14" max="32" value="18" class="w-full range">
+  </div>
+
+  <!-- Line Height -->
+  <div>
+    <label class="block text-sm mb-1">Line Height</label>
+    <input id="lineHeight" type="range" min="1.2" max="2" step="0.1" value="1.5" class="w-full range">
+  </div>
+
+  <!-- Username / Handle -->
+  <div class="grid grid-cols-2 gap-3">
+    <input id="username" class="rounded-xl bg-black/30 border border-white/10 p-2" placeholder="Name">
+    <input id="handle" class="rounded-xl bg-black/30 border border-white/10 p-2" placeholder="@handle">
+  </div>
+
+  <!-- Avatar -->
+  <label class="flex items-center gap-2 text-sm">
+    <input type="checkbox" id="avatarToggle" checked>
+    Show Avatar
+  </label>
+
+  <!-- Date -->
+  <input id="dateInput" class="w-full rounded-xl bg-black/30 border border-white/10 p-2 text-sm">
+
+  <!-- Theme -->
+  <div>
+    <label class="block text-sm mb-1">Theme</label>
+    <div id="themes" class="grid grid-cols-2 gap-2 text-sm"></div>
+  </div>
+
+  <!-- Shadow -->
+  <div>
+    <label class="block text-sm mb-1">Shadow Depth</label>
+    <input id="shadowDepth" type="range" min="0" max="40" value="20" class="w-full range">
+  </div>
+
+  <!-- Blur -->
+  <div>
+    <label class="block text-sm mb-1">Glass Blur</label>
+    <input id="blurIntensity" type="range" min="4" max="32" value="16" class="w-full range">
+  </div>
+
+  <!-- Noise -->
+  <label class="flex items-center gap-2 text-sm">
+    <input type="checkbox" id="noiseToggle" checked>
+    Background Noise
+  </label>
+
+  <!-- Export -->
+  <button id="exportBtn" class="w-full mt-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition font-semibold">
+    Export as PNG
+  </button>
+
 </div>
 
-<!-- ===== KUNDLI ===== -->
-<div class="glass">
-  <h2>Kundli (Whole Sign)</h2>
-  <canvas id="chart" width="320" height="320"></canvas>
-  <div id="astroOutput"></div>
-</div>
+<!-- ================= RIGHT PANEL ================= -->
+<div class="flex items-center justify-center">
+  <div id="previewWrapper" class="relative">
+    <div id="preview" class="glass rounded-2xl p-6 w-[360px] sm:w-[420px] shadow-2xl relative noise">
 
-<!-- ===== TAROT ===== -->
-<div class="glass">
-  <h2>Tarot Guidance</h2>
-  <button onclick="drawTarot()">Draw Card</button>
-  <br><br>
-  <div id="tarotResult"></div>
-</div>
+      <!-- Fake Window -->
+      <div class="flex items-center gap-2 mb-4 window-dots">
+        <span style="background:#ef4444"></span>
+        <span style="background:#f59e0b"></span>
+        <span style="background:#10b981"></span>
+      </div>
 
-<footer>
-<p>
-<strong>Disclaimer:</strong><br>
-This platform provides traditional astrology and tarot interpretations for reflection and cultural interest only.
-It does not provide medical, legal, or life-altering advice.<br>
-Tarot readings are symbolic and meant for introspection, not prediction.
-</p>
-</footer>
+      <!-- Header -->
+      <div class="flex items-center gap-3 mb-4">
+        <div id="avatar" class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center font-bold">A</div>
+        <div>
+          <div id="previewName" class="font-semibold">Anonymous</div>
+          <div id="previewHandle" class="text-sm text-gray-400">@handle</div>
+        </div>
+        <div class="ml-auto text-xs text-gray-400" id="previewDate"></div>
+      </div>
 
-</div>
+      <!-- Content -->
+      <pre id="previewText" class="whitespace-pre-wrap break-words"></pre>
 
-<script>
-/* ===========================
-   TIME & ASTRONOMY CORE
-=========================== */
-
-function toJulian(dateUTC) {
-  return dateUTC / 86400000 + 2440587.5;
-}
-
-// Approx Lahiri Ayanamsa
-function ayanamsa(jd) {
-  const T = (jd - 2451545.0) / 36525;
-  return 22.460 + 1.396042 * T;
-}
-
-// Sun longitude (simplified, accurate enough)
-function sunLongitude(jd) {
-  const T = (jd - 2451545) / 36525;
-  let L = 280.46646 + 36000.76983 * T;
-  let M = 357.52911 + 35999.05029 * T;
-  let C = (1.914602 - 0.004817*T)*Math.sin(M*Math.PI/180);
-  return (L + C - ayanamsa(jd) + 360) % 360;
-}
-
-// Moon longitude (low precision)
-function moonLongitude(jd) {
-  let D = jd - 2451545;
-  let L = 218.316 + 13.176396 * D;
-  return (L - ayanamsa(jd) + 360) % 360;
-}
-
-// Ascendant (simplified)
-function ascendant(jd, lat, lon) {
-  let T = (jd - 2451545.0)/36525;
-  let GST = 280.46061837 + 360.98564736629*(jd-2451545);
-  let LST = (GST + lon) % 360;
-  let asc = Math.atan2(
-    Math.sin(LST*Math.PI/180),
-    Math.cos(LST*Math.PI/180)
-  ) * 180/Math.PI;
-  return (asc - ayanamsa(jd) + 360) % 360;
-}
-
-/* ===========================
-   ASTRO HELPERS
-=========================== */
-
-const signs = [
-  "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
-  "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"
-];
-
-const nakshatras = [
-  "Ashwini","Bharani","Krittika","Rohini","Mrigashira","Ardra",
-  "Punarvasu","Pushya","Ashlesha","Magha","Purva Phalguni","Uttara Phalguni",
-  "Hasta","Chitra","Swati","Vishakha","Anuradha","Jyeshtha",
-  "Mula","Purva Ashadha","Uttara Ashadha","Shravana","Dhanishta",
-  "Shatabhisha","Purva Bhadrapada","Uttara Bhadrapada","Revati"
-];
-
-function signFromLon(lon){ return signs[Math.floor(lon/30)]; }
-
-function nakshatraFromLon(lon){
-  let n = Math.floor(lon / 13.3333);
-  let pada = Math.floor((lon % 13.3333) / 3.3333) + 1;
-  return nakshatras[n] + " (Pada " + pada + ")";
-}
-
-/* ===========================
-   KUNDLI DRAW
-=========================== */
-
-function drawChart(ascSign){
-  const c = document.getElementById("chart");
-  const ctx = c.getContext("2d");
-  ctx.clearRect(0,0,320,320);
-
-  ctx.strokeStyle = "#aaa";
-  ctx.beginPath();
-  ctx.arc(160,160,140,0,Math.PI*2);
-  ctx.stroke();
-
-  for(let i=0;i<12;i++){
-    let angle = (i*30-90)*Math.PI/180;
-    ctx.fillText(signs[i],160+110*Math.cos(angle),160+110*Math.sin(angle));
-  }
-
-  ctx.fillText("Asc: "+ascSign,120,160);
-}
-
-/* ===========================
-   MAIN GENERATION
-=========================== */
-
-function generateChart(){
-  const dob = document.getElementById("dob").value;
-  const tob = document.getElementById("tob").value;
-  const lat = parseFloat(document.getElementById("lat").value);
-  const lon = parseFloat(document.getElementById("lon").value);
-  const tz = parseFloat(document.getElementById("tz").value);
-
-  const local = new Date(dob+"T"+tob);
-  const utc = local.getTime() - tz*3600000;
-  const jd = toJulian(utc);
-
-  const sun = sunLongitude(jd);
-  const moon = moonLongitude(jd);
-  const asc = ascendant(jd,lat,lon);
-
-  const output = `
-  <p><strong>Ascendant:</strong> ${signFromLon(asc)}</p>
-  <p><strong>Sun:</strong> ${signFromLon(sun)}</p>
-  <p><strong>Moon:</strong> ${signFromLon(moon)}</p>
-  <p><strong>Nakshatra:</strong> ${nakshatraFromLon(moon)}</p>
-  `;
-
-  document.getElementById("astroOutput").innerHTML = output;
-  drawChart(signFromLon(asc));
-}
-
-/* ===========================
-   TAROT SYSTEM
-=========================== */
-
-const tarotDeck = [
-  {
-    name:"The Fool",
-    upright:"New beginnings, openness, curiosity.",
-    reversed:"Hesitation, fear of change."
-  },
-  {
-    name:"The Magician",
-    upright:"Skill, focus, conscious creation.",
-    reversed:"Scattered energy, self-doubt."
-  },
-  {
-    name:"The High Priestess",
-    upright:"Inner awareness, intuition.",
-    reversed:"Ignoring inner voice."
-  }
-  // Extend to full 78 cards easily
-];
-
-function drawTarot(){
-  const card = tarotDeck[Math.floor(Math.random()*tarotDeck.length)];
-  const reversed = Math.random() < 0.5;
-
-  document.getElementById("tarotResult").innerHTML = `
-    <div class="tarot-card">
-      <div>
-        <strong>${card.name}</strong><br><br>
-        ${reversed ? card.reversed : card.upright}<br><br>
-        <em>${reversed ? "Reversed" : "Upright"}</em>
+      <!-- Footer -->
+      <div id="watermark" class="mt-4 text-xs text-gray-500 text-right">
+        Made with CleanShot
       </div>
     </div>
-  `;
-}
-</script>
-</body>
-</html>
+  </div>
+</div>
+</div> </section> <!-- ========================================================= PRICING ========================================================= --> <section class="max-w-5xl mx-auto px-6 py-20"> <h2 class="text-3xl font-brutal text-center mb-12">Simple Pricing</h2> <div class="grid md:grid-cols-2 gap-6">
+  <div class="glass rounded-2xl p-6">
+  <h3 class="text-xl font-semibold mb-2">Free</h3>
+  <ul class="text-sm text-gray-400 space-y-2 mb-4">
+    <li>• 3 themes</li>
+    <li>• Watermark</li>
+    <li>• Standard export</li>
+  </ul>
+</div>
+
+<div class="glass rounded-2xl p-6 border border-indigo-500">
+  <h3 class="text-xl font-semibold mb-2">Pro</h3>
+  <p class="text-indigo-400 mb-2">₹499 lifetime (placeholder)</p>
+  <ul class="text-sm text-gray-400 space-y-2 mb-4">
+    <li>• All themes</li>
+    <li>• No watermark</li>
+    <li>• High-res export</li>
+    <li>• Future theme packs</li>
+  </ul>
+  <button id="upgradeBtn" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition font-semibold">
+    Upgrade to Pro
+  </button>
+</div>
+</div> </section> <!-- ========================================================= FOOTER ========================================================= --> <footer class="py-10 text-center text-sm text-gray-500"> <div class="tooltip inline-block" data-tip="Built as a single HTML file"> Built with ❤️ as a single-file Micro-SaaS </div> <div class="mt-2"> <a href="#" class="hover:text-gray-300">GitHub Repository</a> </div> </footer> <!-- ========================================================= JAVASCRIPT ========================================================= --> <script> /* ============================================================ PRO STATE Future Gumroad / license key validation goes here. ============================================================ */ let isProUser = false; /* ============================================================ THEMES ============================================================ */ const themes = { "Midnight Glass": { bg: "rgba(17,24,39,0.6)", color: "#e5e7eb", pro: false }, "Soft Aurora": { bg: "linear-gradient(135deg,#312e81,#0f766e)", color: "#ecfeff", pro: false }, "Minimal Light": { bg: "rgba(255,255,255,0.85)", color: "#020617", pro: false }, "Neon Brutal": { bg: "linear-gradient(135deg,#7c3aed,#ec4899)", color: "#ffffff", pro: true }, "Cyber Dark": { bg: "#020617", color: "#22d3ee", pro: true }, "Hacker Code": { bg: "#000000", color: "#22c55e", pro: true }, "Solar Chrome": { bg: "linear-gradient(135deg,#fde047,#fb7185)", color: "#020617", pro: true }, "Mono Brutalist": { bg: "#111827", color: "#ffffff", pro: true } }; let currentTheme = "Midnight Glass"; /* ============================================================ DOM REFERENCES ============================================================ */ const textInput = document.getElementById('textInput'); const previewText = document.getElementById('previewText'); const preview = document.getElementById('preview'); const previewName = document.getElementById('previewName'); const previewHandle = document.getElementById('previewHandle'); const previewDate = document.getElementById('previewDate'); const avatar = document.getElementById('avatar'); const watermark = document.getElementById('watermark'); /* ============================================================ INITIAL STATE ============================================================ */ document.getElementById('dateInput').value = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); previewDate.textContent = document.getElementById('dateInput').value; /* ============================================================ THEME RENDER ============================================================ */ const themesContainer = document.getElementById('themes'); Object.keys(themes).forEach(name => { const t = themes[name]; const btn = document.createElement('button'); btn.textContent = name + (t.pro ? ' PRO' : ''); btn.className = 'px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-left'; if (t.pro && !isProUser) btn.classList.add('pro-locked'); btn.onclick = () => { if (t.pro && !isProUser) { alert('Upgrade to Pro to unlock this theme.'); return; } currentTheme = name; applyTheme(); }; themesContainer.appendChild(btn); }); function applyTheme() { const t = themes[currentTheme]; preview.style.background = t.bg; preview.style.color = t.color; } applyTheme(); /* ============================================================ LIVE UPDATE (DEBOUNCED) ============================================================ */ let debounce; function updatePreview() { clearTimeout(debounce); debounce = setTimeout(() => { previewText.textContent = textInput.value; }, 50); } textInput.addEventListener('input', updatePreview); /* ============================================================ CONTROLS BINDINGS ============================================================ */ document.getElementById('fontFamily').onchange = e => previewText.style.fontFamily = e.target.value; document.getElementById('fontSize').oninput = e => previewText.style.fontSize = e.target.value + 'px'; document.getElementById('lineHeight').oninput = e => previewText.style.lineHeight = e.target.value; document.getElementById('username').oninput = e => previewName.textContent = e.target.value || 'Anonymous'; document.getElementById('handle').oninput = e => previewHandle.textContent = e.target.value || '@handle'; document.getElementById('avatarToggle').onchange = e => avatar.style.display = e.target.checked ? 'flex' : 'none'; document.getElementById('dateInput').oninput = e => previewDate.textContent = e.target.value; document.getElementById('shadowDepth').oninput = e => preview.style.boxShadow = `0 ${e.target.value}px ${e.target.value * 2}px rgba(0,0,0,0.5)`; document.getElementById('blurIntensity').oninput = e => preview.style.setProperty('--blur', e.target.value + 'px'); document.getElementById('noiseToggle').onchange = e => preview.classList.toggle('noise', e.target.checked); /* ============================================================ EXPORT ============================================================ */ document.getElementById('exportBtn').onclick = async () => { if (!window.html2canvas) { await loadHtml2Canvas(); } const canvas = await html2canvas(preview, { scale: isProUser ? 2 : 1, backgroundColor: null }); const link = document.createElement('a'); link.download = 'cleanshot-' + Date.now() + '.png'; link.href = canvas.toDataURL(); link.click(); }; function loadHtml2Canvas() { return new Promise(resolve => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'; s.onload = resolve; document.body.appendChild(s); }); } /* ============================================================ PRESETS ============================================================ */ document.querySelectorAll('.preset').forEach(btn => { btn.onclick = () => { if (btn.dataset.type === 'tweet') { textInput.value = "Shipping in public is the fastest way to learn.\n\nBuild. Share. Repeat."; } if (btn.dataset.type === 'testimonial') { textInput.value = "CleanShot instantly made my posts look premium.\n\n— Happy User"; } if (btn.dataset.type === 'code') { textInput.value = "function shipFast() {\n return 'Build → Share → Learn';\n}"; document.querySelector('input[value=\"code\"]').checked = true; previewText.style.fontFamily = 'JetBrains Mono'; } updatePreview(); }; }); /* ============================================================ UPGRADE BUTTON (UI ONLY) ============================================================ */ document.getElementById('upgradeBtn').onclick = () => { // Simulated unlock for demo purposes isProUser = true; watermark.style.display = 'none'; alert('Pro unlocked (demo). All themes enabled.'); location.reload(); }; </script> </body> </html>
